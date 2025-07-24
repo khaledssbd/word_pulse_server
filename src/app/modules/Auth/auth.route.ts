@@ -14,7 +14,11 @@ router.post(
 );
 
 // loginUser
-router.post('/login', authControllers.loginUser);
+router.post(
+  '/login',
+  validateRequest(authValidation.loginUserSchema),
+  authControllers.loginUser
+);
 
 // getMyProfile
 router.get('/me', auth(), authControllers.getMyProfile);

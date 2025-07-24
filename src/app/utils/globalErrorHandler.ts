@@ -26,7 +26,7 @@ const globalErrorHandler = (
   if (err instanceof ZodError) {
     const simplifiedError = handleZodError(err);
     statusCode = simplifiedError?.statusCode;
-    message = simplifiedError?.message;
+    message = simplifiedError?.errorSources[0]?.message;
     errorSources = simplifiedError?.errorSources;
   } else if (err?.code === 11000) {
     const simplifiedError = handleDuplicateError(err);

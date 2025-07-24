@@ -83,7 +83,7 @@ const updateAnArticle = catchAsync(async (req, res) => {
 
 // deleteAnArticle
 const deleteAnArticle = catchAsync(async (req, res) => {
-  await articleServices.deleteAnArticleFromDB(req.params.id);
+  await articleServices.deleteAnArticleFromDB(req.params.id, req.user);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -94,10 +94,7 @@ const deleteAnArticle = catchAsync(async (req, res) => {
 
 // deleteAnArticle
 const summarizeArticle = catchAsync(async (req, res) => {
-  const result = await articleServices.summarizeArticleFromDB(
-    req.params.id,
-    req.user
-  );
+  const result = await articleServices.summarizeArticleFromDB(req.params.id);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

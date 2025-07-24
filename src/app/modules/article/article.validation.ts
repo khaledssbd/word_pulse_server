@@ -1,16 +1,8 @@
 import { z } from 'zod';
 
-
-
 // createAnArticle
 const createAnArticle = z.object({
   body: z.object({
-    id: z
-      .string({
-        invalid_type_error: 'Id must be string!',
-      })
-      .optional(),
-
     title: z
       .string({
         required_error: 'Title is required!',
@@ -18,7 +10,7 @@ const createAnArticle = z.object({
       })
       .trim()
       .min(10, { message: 'Title must have minimum 10 characters!' })
-      .max(60, { message: "Title can't exceed 60 characters!" }),
+      .max(100, { message: "Title can't exceed 100 characters!" }),
 
     body: z
       .string({

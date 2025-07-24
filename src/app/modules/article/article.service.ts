@@ -6,9 +6,13 @@ import { TPaginationReturn } from '../../builder/paginationHelper';
 import { TArticleFilterOptions } from './article.constants';
 import { httpStatus } from '../../utils/httpStatus';
 import AppError from '../../errors/AppError';
-import { generateText } from 'ai';
-import { openai } from '@ai-sdk/openai';
+import { CohereClient } from 'cohere-ai';
 
+const cohere = new CohereClient({
+  token: process.env.COHERE_API_KEY!,
+});
+
+// createAnArticleIntoDB
 const createAnArticleIntoDB = async (
   userData: JwtPayload,
   payload: Article
@@ -123,16 +127,16 @@ const updateArticleFromDB = async (
 };
 
 // deleteAnArticleFromDB
-const deleteAnArticleFromDB = async (id: string) => {
+const deleteAnArticleFromDB = async (id: string, user: JwtPayload) => {
   const result = await prisma.article.delete({
-    where: { id },
+    where: { id, authorId: user.id },
   });
 
   return result;
 };
 
 // summarizeArticleFromDB
-const summarizeArticleFromDB = async (id: string, user: JwtPayload) => {
+const summarizeArticleFromDB = async (id: string) => {
   const article = await prisma.article.findUnique({
     where: { id },
   });
@@ -141,26 +145,21 @@ const summarizeArticleFromDB = async (id: string, user: JwtPayload) => {
     throw new AppError(httpStatus.NOT_FOUND, 'Article not found!');
   }
 
-  if (article.authorId !== user.id) {
-    throw new AppError(httpStatus.FORBIDDEN, 'Forbidden!');
-  }
-
-  // Check if we have OpenAI API key, otherwise return mock summary
-  if (!process.env.OPENAI_API_KEY) {
+  if (!process.env.COHERE_API_KEY) {
     const mockSummary = `This is a mock summary of "${article.title}". The article discusses various topics and provides insights into the subject matter. Key points include important concepts and practical applications that readers can benefit from.`;
-
     return { summary: mockSummary };
   }
 
-  const { text: summary } = await generateText({
-    model: openai('gpt-4o-mini'),
-    system:
-      'You are a professional summarizer. Provide concise, informative summaries that capture the key points and main ideas of the given text.',
-    prompt: `Please summarize the following article titled "${article.title}":\n\n${article.body}`,
-    maxTokens: 200,
+  const response = await cohere.summarize({
+    text: article.body,
+    length: 'short',
+    format: 'paragraph',
+    model: 'command',
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    extractiveness: 'auto' as any,
   });
 
-  return { summary };
+  return { summary: response.summary };
 };
 
 export const articleServices = {

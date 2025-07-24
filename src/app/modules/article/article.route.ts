@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response, Router } from 'express';
+import { Router } from 'express';
 import { articleControllers } from './article.controller';
 import { auth } from '../../middlewares/auth';
 import validateRequest from '../../middlewares/validateRequest';
@@ -10,10 +10,6 @@ const router: Router = Router();
 router.post(
   '/',
   auth(),
-  (req: Request, res: Response, next: NextFunction) => {
-    req.body = JSON.parse(req.body.data);
-    next();
-  },
   validateRequest(articleValidationSchemas.createAnArticle),
   articleControllers.createAnArticle
 );
@@ -31,22 +27,14 @@ router.get('/:id', articleControllers.getSingleArticle);
 router.put(
   '/:id',
   auth(),
-  (req: Request, res: Response, next: NextFunction) => {
-    req.body = JSON.parse(req.body.data);
-    next();
-  },
   validateRequest(articleValidationSchemas.createAnArticle),
   articleControllers.updateAnArticle
 );
 
 // deleteAnArticle
-router.delete('/:id', articleControllers.deleteAnArticle);
+router.delete('/:id', auth(), articleControllers.deleteAnArticle);
 
 // summarizeArticle
-router.delete(
-  '/summarize-article/:id',
-  auth(),
-  articleControllers.summarizeArticle
-);
+router.post('/:id/summarize', articleControllers.summarizeArticle);
 
 export const ArticleRoutes = router;

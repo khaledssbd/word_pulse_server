@@ -38,7 +38,7 @@ const createUserIntoDB = async (payload: User) => {
       name: true,
       email: true,
       createdAt: true,
-      updatedAt: true,
+      // updatedAt: true,
     },
   });
 
